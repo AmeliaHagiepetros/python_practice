@@ -1,0 +1,46 @@
+import pandas as pd
+import numpy as np
+
+
+def distance2(p1,p2):
+    deltap1= p1[0]-p2[0]
+    deltap2 = p1[1]-p2[1]
+    dist = np.sqrt(deltap1**2 + deltap2**2)*2
+    return dist/60
+
+
+def robber_algo(): 
+    profit = 0
+    time = 0 
+    limit = 24
+    banks = []
+    
+    df2 = pd.read_csv('/Users/ameliahagiepetros/Documents/concordia-bootcamps/ds-project-the-big-heist/data/bank_data.csv')
+    df2['bank_val'] = df2.money/(df2['time (hr)']*60)
+    df2 = df2.sort_values(['bank_val'],ascending=False)
+    
+    while time < limit:
+        current = df2.iloc[0]
+        #current bank being robbed
+        next_ = df2.iloc[1]
+        #next bank in index to be robbed
+        travel_t = distance2((current['x_coordinate'],current['y_coordinate']),(next_['x_coordinate'],next_['y_coordinate']))
+        #travel time to next bank. It is using current x,y 
+        totaltime = travel_t + current['time (hr)']
+        #total time at this step? is being added
+        time += totaltime
+        banks.append(int(current['id']))
+        #add the bank id to the list 
+        profit += current['money']
+        #current bank is added to profit
+        time_to_helipad = time + distance2((next_['x_coordinate'], next_['y_coordinate']),(0,0)) + next_['time (hr)']
+        #0,0 is the coordinates of the helipad 
+        df2.drop(current[0],inplace=True)
+        
+        if time_to_helipad >= limit:
+                break 
+    else:
+        print('jail time!')
+    return profit, banks, time
+
+robber_algo()
